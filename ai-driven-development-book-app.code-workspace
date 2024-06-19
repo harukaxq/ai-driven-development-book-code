@@ -7,6 +7,10 @@
     {
       "name": "projects/game/",
       "path": "./projects/game"
+    },
+    {
+      "name": "projects/music_app/",
+      "path": "./projects/music_app"
     }
   ],
   "settings": {
