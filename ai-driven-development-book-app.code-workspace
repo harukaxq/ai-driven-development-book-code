@@ -1,0 +1,17 @@
+{
+  "folders": [
+    {
+      "name": "chapters/",
+      "path": "./chapters"
+    },
+    {
+      "name": "projects/game/",
+      "path": "./projects/game"
+    }
+  ],
+  "settings": {
+    "files.exclude": {},
+    "editor.formatOnSave": true,
+    "editor.formatOnPaste": true
+  }
+}
