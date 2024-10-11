@@ -1,16 +1,10 @@
-function cowsay(message: string): string {
-    const cow = `
-        ${"_".repeat(message.length + 2)}
-       < ${message} >
-        ${"-".repeat(message.length + 2)}
-               \\   ^__^
-                \\  (oo)\\_______
-                   (__)\\       )\\/\\
-                       ||----w |
-                       ||     ||
-    `;
-    return cow;
+import { cow, penguin } from './aa';
+
+function cowsay(message: string, animal: 'cow' | 'penguin' = 'cow'): string {
+    const art = animal === 'cow' ? cow : penguin;
+    return art.replace(/\${message}/g, message);
 }
 
 const message = "Hello, World!";
-console.log(cowsay(message));
+console.log(cowsay(message, 'cow'));
+console.log(cowsay(message, 'penguin'));

@@ -3,9 +3,14 @@
   "module": "index.ts",
   "type": "module",
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "aicommit2": "^2.0.9",
+    "opencommit": "^3.1.2"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "yargs": "^17.7.2"
   }
 }
