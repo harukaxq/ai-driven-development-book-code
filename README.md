@@ -9,15 +9,16 @@
 
 ## 📁 リポジトリの構成
 
+### projects/ 
+- othello/ - オセロの完成コード
+- 2048/ - 2048の完成コード
+- music_app/ - 音楽配信アプリの完成コード 
+
 ### templates/
 - othello_template/ - オセロゲームのテンプレート 
 - 2048_template/ - 2048のテンプレート
 - music_app/ - 音楽配信アプリのテンプレート
-
-### projects/ 
-- othello/ - オセロの完成コード
-- 2048/ - 2048の完成コード
-- soundscape_odyssey/ - 音楽配信アプリの完成コード 
+- playground/ - Cursorの動作を確認するためのテンプレート
 
 ### sample_data/
 - サンプルの音声、画像ファイル
