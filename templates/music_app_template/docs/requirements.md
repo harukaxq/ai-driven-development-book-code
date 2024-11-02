@@ -241,6 +241,10 @@ graph TD
 
 #### アーティスト管理ページ(/admin/artists/)
 - **概要**：アーティストの一覧表示、追加、編集を行います。
+- **API**：
+  - GET /api/artist アーティスト情報の取得
+  - POST /admin/api/artist アーティストの追加
+  - PUT /admin/api/artist/[id] アーティストの更新
 - **UIコンポーネント**：
   - **アーティスト一覧テーブル**：
     - アーティスト名
