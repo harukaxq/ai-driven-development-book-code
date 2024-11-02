@@ -1,10 +1,18 @@
-import { cow, penguin } from './aa';
+export function cowsay(message: string = "Hello, World!"): void {
+    const cow = `        \\   ^__^
+         \\  (oo)\\_______
+            (__)\\       )\\/\\
+                ||----w |
+                ||     ||
+    `;
 
-function cowsay(message: string, animal: 'cow' | 'penguin' = 'cow'): string {
-    const art = animal === 'cow' ? cow : penguin;
-    return art.replace(/\${message}/g, message);
+    const border = '-'.repeat(message.length + 2);
+    const speechBubble = `
+ ${border}
+< ${message} >
+ ${border}`;
+
+    console.log(`${speechBubble}\n${cow}`);
 }
 
-const message = "Hello, World!";
-console.log(cowsay(message, 'cow'));
-console.log(cowsay(message, 'penguin'));
+cowsay();
