@@ -1,2 +1,3 @@
 - コンポーネントには直接CSSを記述せず、必ずTailwindを使用しなさい。
 - APIは$lib/apiからインポートせずにfetchを使用して呼び出しなさい。
+- APIの中でtry catchを使用しない。
