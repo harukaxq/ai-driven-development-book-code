@@ -1,3 +1,4 @@
-コンポーネントには直接CSSを記述せず、必ずTailwindを使用しなさい。
-+page.svelteにはexport let は使わない
-tsファイル内の関数は定義だけでなく、exportすること。
+- コンポーネントには直接CSSを記述せず、必ずTailwindを使用しなさい。
+- +page.svelteにはexport let は使わない
+- tsファイル内の関数は定義だけでなく、exportすること。
+- APIは$lib/apiからインポートせずにfetchを使用して呼び出しなさい。
