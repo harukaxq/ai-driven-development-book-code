@@ -2,3 +2,4 @@
 - +page.svelteにはexport let は使わない
 - tsファイル内の関数は定義だけでなく、exportすること。
 - APIは$lib/apiからインポートせずにfetchを使用して呼び出しなさい。
+- APIの中でtry catchを使用しない。
