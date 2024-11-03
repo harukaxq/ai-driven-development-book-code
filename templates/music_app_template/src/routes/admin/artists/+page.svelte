@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import { onMount } from 'svelte';
     import { writable } from 'svelte/store';
 
@@ -7,11 +7,11 @@
     let showEditModal = writable(false);
     let newArtistName = '';
     let newArtistProfile = '';
-    let newArtistImage = null;
-    let editArtistId = null;
+    let newArtistImage: File | null = null;
+    let editArtistId: string | null = null;
     let editArtistName = '';
     let editArtistProfile = '';
-    let editArtistImage = null;
+    let editArtistImage: File | null = null;
 
     const fetchArtists = async () => {
         const response = await fetch('/api/artists');
@@ -58,7 +58,7 @@
         }
     };
 
-    const openEditModal = (artist) => {
+    const openEditModal = (artist: { id: string; name: string; profile: string; }) => {
         editArtistId = artist.id;
         editArtistName = artist.name;
         editArtistProfile = artist.profile;
@@ -85,7 +85,7 @@
             </label>
             <label class="block mb-4">
                 画像:
-                <input type="file" accept="image/*" on:change={(e) => newArtistImage = e.target.files[0]} class="border p-2 w-full" />
+                <input type="file" accept="image/*" on:change={(e) => newArtistImage = (e.target as HTMLInputElement).files?.[0] || null} class="border p-2 w-full" />
             </label>
             <div class="flex justify-end">
                 <button class="bg-gray-500 text-white p-2 rounded mr-2" on:click={() => showModal.set(false)}>キャンセル</button>
@@ -109,7 +109,7 @@
             </label>
             <label class="block mb-4">
                 画像:
-                <input type="file" accept="image/*" on:change={(e) => editArtistImage = e.target.files[0]} class="border p-2 w-full" />
+                <input type="file" accept="image/*" on:change={(e) => editArtistImage = (e.target as HTMLInputElement).files?.[0] || null} class="border p-2 w-full" />
             </label>
             <div class="flex justify-end">
                 <button class="bg-gray-500 text-white p-2 rounded mr-2" on:click={() => showEditModal.set(false)}>キャンセル</button>
