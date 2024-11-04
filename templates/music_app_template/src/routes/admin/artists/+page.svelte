@@ -1,8 +1,9 @@
 <script lang="ts">
     import { onMount } from 'svelte';
     import { writable } from 'svelte/store';
+    import type { Artist } from '@prisma/client';
 
-    let artists = writable([]);
+    let artists = writable<Artist[]>([]);
     let showModal = writable(false);
     let showEditModal = writable(false);
     let newArtistName = '';
@@ -23,7 +24,9 @@
         const formData = new FormData();
         formData.append('name', newArtistName);
         formData.append('profile', newArtistProfile);
-        formData.append('image', newArtistImage);
+        if (newArtistImage) {
+            formData.append('image', newArtistImage);
+        }
 
         const response = await fetch('/admin/api/artists', {
             method: 'POST',
@@ -40,10 +43,17 @@
 
     const editArtist = async () => {
         const formData = new FormData();
-        formData.append('id', editArtistId);
+        if (editArtistId) {
+            formData.append('id', editArtistId);
+        }
         formData.append('name', editArtistName);
         formData.append('profile', editArtistProfile);
-        formData.append('image', editArtistImage);
+        if (editArtistImage) {
+            formData.append('image', editArtistImage);
+        } else {
+            alert('画像がアップロードされていません');
+            return;
+        }
 
         const response = await fetch('/admin/api/artists', {
             method: 'PUT',
@@ -58,12 +68,17 @@
         }
     };
 
-    const openEditModal = (artist: { id: string; name: string; profile: string; }) => {
-        editArtistId = artist.id;
+    const openEditModal = (artist: Artist) => {
+        editArtistId = artist.id.toString();
         editArtistName = artist.name;
         editArtistProfile = artist.profile;
         editArtistImage = null;
         showEditModal.set(true);
+    };
+
+    const handleFileChange = (e: Event, setImage: (file: File | null) => void) => {
+        const target = e.target as HTMLInputElement;
+        setImage(target.files?.[0] || null);
     };
 
     onMount(fetchArtists);
@@ -85,7 +100,7 @@
             </label>
             <label class="block mb-4">
                 画像:
-                <input type="file" accept="image/*" on:change={(e) => newArtistImage = (e.target as HTMLInputElement).files?.[0] || null} class="border p-2 w-full" />
+                <input type="file" accept="image/*" on:change={(e) => handleFileChange(e, (file) => newArtistImage = file)} class="border p-2 w-full" />
             </label>
             <div class="flex justify-end">
                 <button class="bg-gray-500 text-white p-2 rounded mr-2" on:click={() => showModal.set(false)}>キャンセル</button>
@@ -109,7 +124,7 @@
             </label>
             <label class="block mb-4">
                 画像:
-                <input type="file" accept="image/*" on:change={(e) => editArtistImage = (e.target as HTMLInputElement).files?.[0] || null} class="border p-2 w-full" />
+                <input type="file" accept="image/*" on:change={(e) => handleFileChange(e, (file) => editArtistImage = file)} class="border p-2 w-full" />
             </label>
             <div class="flex justify-end">
                 <button class="bg-gray-500 text-white p-2 rounded mr-2" on:click={() => showEditModal.set(false)}>キャンセル</button>
@@ -151,4 +166,3 @@
         </tbody>
     </table>
 {/if}
-
