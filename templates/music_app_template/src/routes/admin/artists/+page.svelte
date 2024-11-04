@@ -36,6 +36,10 @@
         if (response.ok) {
             fetchArtists();
             showModal.set(false);
+            newArtistName = '';
+            newArtistProfile = '';
+            newArtistImage = null;
+            alert('アーティストが追加されました');
         } else {
             console.error('Failed to add artist');
         }
