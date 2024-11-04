@@ -1,3 +1,7 @@
+- すべてのコードはSveltekit4に準拠しなさい。
 - コンポーネントには直接CSSを記述せず、必ずTailwindを使用しなさい。
 - APIは$lib/apiからインポートせずにfetchを使用して呼び出しなさい。
 - APIの中でtry catchを使用しない。
+- 可能な限りTypeScriptの型を使用しなさい。
+- Prismaの型は@prisma/clientからインポートしなさい。
+- storaから読み込む場合はsvelte/storeからインポートしたgetを使用しなさい。
