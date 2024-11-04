@@ -1,5 +1,5 @@
 - すべてのコードはSveltekit4に準拠しなさい。
-- $app/storesからインポートした$page.params.[{slug}]を使用してURLに埋め込まれているパラメータを取得しなさい。
+- import { page } from '$app/stores'; でをインポートしたpageを$page.params.[{slug}]を使用してURLに埋め込まれているパラメータを取得しなさい。
 - コンポーネントには直接CSSを記述せず、必ずTailwindを使用しなさい。
 - +page.svelteにはexport let は使わない
 - tsファイル内の関数は定義だけでなく、exportすること。
