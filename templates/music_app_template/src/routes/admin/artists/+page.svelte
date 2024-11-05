@@ -145,8 +145,8 @@
         <thead>
             <tr>
                 <th class="py-2 px-4 border-b">アーティスト名</th>
+                <th class="py-2 px-4 border-b">プロフィール</th>
                 <th class="py-2 px-4 border-b">画像</th>
-                <th class="py-2 px-4 border-b">作成日時</th>
                 <th class="py-2 px-4 border-b">曲管理ページ</th>
                 <th class="py-2 px-4 border-b">編集</th>
             </tr>
@@ -155,10 +155,10 @@
             {#each $artists as artist}
                 <tr>
                     <td class="py-2 px-4 border-b">{artist.name}</td>
+                    <td class="py-2 px-4 border-b max-w-xs break-words">{artist.profile}</td>
                     <td class="py-2 px-4 border-b">
                         <img src={artist.image} alt={artist.name} class="h-16 w-16 object-cover rounded-full" />
                     </td>
-                    <td class="py-2 px-4 border-b">{new Date(artist.createdAt).toLocaleString()}</td>
                     <td class="py-2 px-4 border-b text-center">
                         <a href={`/admin/artists/${artist.id}/songs`} class="text-blue-500 hover:underline">曲管理</a>
                     </td>
