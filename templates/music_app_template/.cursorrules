@@ -8,3 +8,7 @@
 - APIの中でtry catchを使用しない。
 - 可能な限りTypeScriptの型を使用しなさい。
 - Prismaの型は@prisma/clientからインポートしなさい。
+- テストコードには、以下の処理を含めなさい。
+ testFile.arrayBuffer = async function() {
+      return testImageBuffer.buffer;
+    };
