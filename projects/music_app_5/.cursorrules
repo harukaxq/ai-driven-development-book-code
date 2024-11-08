@@ -1,0 +1,10 @@
+- すべてのコードはSvelte 4に準拠しなさい。
+- scriptタグ内でstoreから値を読み込む場合はsvelte/storeからインポートしたgetを使用しなさい。テンプレート内では$を使用しなさい。
+- ルーティングでURLに埋め込まれているパラメータを取得する場合はimport { page } from '$app/stores'; をインポートしたpageを$page.params.[{slug}]を使用しなさい。
+- コンポーネントには直接CSSを記述せず、必ずTailwindを使用しなさい。
+- アーティストのデフォルト画像は/img/artist_default.webpを使用しなさい。
+- 曲のデフォルト画像は/img/song_default.webpを使用しなさい。
+- APIは$lib/apiからインポートせずにfetchを使用して呼び出しなさい。
+- APIの中でtry catchを使用しない。
+- 可能な限りTypeScriptの型を使用しなさい。
+- Prismaの型は@prisma/clientからインポートしなさい。
