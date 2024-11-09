@@ -19,6 +19,7 @@ model Song {
   id        Int      @id @default(autoincrement())
   title     String
   artistId  Int
+  playCount Int      @default(0)
   audio String
   image String?
   artist    Artist   @relation(fields: [artistId], references: [id])

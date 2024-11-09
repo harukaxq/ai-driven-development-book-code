@@ -20,26 +20,31 @@ if (fs.existsSync(backupDir)) {
 // ts_bkディレクトリを作成
 fs.mkdirSync(backupDir);
 
-// ファイルをts_bkに退避し、必要な行をコメントアウト
+// ファイルをts_bkに退避し、元ファイルをコメントアウト
 backupFileList.forEach((filePath) => {
     const fileName = path.basename(filePath);
     const backupFilePath = path.join(backupDir, fileName);
+    console.log(`copy ${filePath} to ${backupFilePath}`);
 
     // ファイルをコピー
     fs.copyFileSync(filePath, backupFilePath);
 
-    // ファイルの内容を読み込み
-    let fileContent = fs.readFileSync(backupFilePath, 'utf-8');
+    // 元ファイルの内容を読み込み
+    let fileContent = fs.readFileSync(filePath, 'utf-8');
 
     // import fsとimport pathをコメントアウト
     fileContent = fileContent.replace(/import fs from 'fs';/g, '// import fs from \'fs\';');
     fileContent = fileContent.replace(/import path from 'path';/g, '// import path from \'path\';');
 
     // path.とfs.の行をコメントアウト
-    fileContent = fileContent.replace(/(path\.)/g, '// $1');
-    fileContent = fileContent.replace(/(fs\.)/g, '// $1');
+    fileContent = fileContent.split('\n').map(line => {
+        if (line.includes('path.') || line.includes('fs.')) {
+            return `// ${line}`;
+        }
+        return line;
+    }).join('\n');
 
-    // ファイルの内容を更新
-    fs.writeFileSync(backupFilePath, fileContent);
+    // 元ファイルの内容を更新
+    fs.writeFileSync(filePath, fileContent);
 });
 
