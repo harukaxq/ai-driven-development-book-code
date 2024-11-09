@@ -1,39 +1,41 @@
 import { PrismaClient } from '@prisma/client';
-import { v4 as uuidv4 } from 'uuid';
 import fs from 'fs';
+import path from 'path';
 
 const prisma = new PrismaClient();
 
-export async function updateSong(id: number, title: string, artistId: number, image?: Buffer, audio?: Buffer) {
-  let imageFileName;
-  let audioFileName;
+export async function updateSong(id: number, title: string, imageFile?: File, audioFile?: File) {
+  let imagePath = null;
+  let audioPath = null;
 
-  if (image) {
-    const imageId = uuidv4();
-    imageFileName = `${imageId}.jpg`;
-    fs.writeFileSync(`./static/uploads/${imageFileName}`, image);
+  if (imageFile) {
+    const uploadDir = path.join(process.cwd(), 'static', 'uploads');
+    const imageFilePath = path.join(uploadDir, imageFile.name);
+
+    const imageBuffer = await imageFile.arrayBuffer();
+    fs.writeFileSync(imageFilePath, Buffer.from(imageBuffer));
+
+    imagePath = `/static/uploads/${imageFile.name}`;
   }
 
-  if (audio) {
-    const audioId = uuidv4();
-    audioFileName = `${audioId}.mp3`;
-    fs.writeFileSync(`./static/uploads/${audioFileName}`, audio);
+  if (audioFile) {
+    const uploadDir = path.join(process.cwd(), 'static', 'uploads');
+    const audioFilePath = path.join(uploadDir, audioFile.name);
+
+    const audioBuffer = await audioFile.arrayBuffer();
+    fs.writeFileSync(audioFilePath, Buffer.from(audioBuffer));
+
+    audioPath = `/static/uploads/${audioFile.name}`;
   }
 
-  // 曲情報をデータベースで更新
-  const song = await prisma.song.update({
-    where: { id: id },
+  const updatedSong = await prisma.song.update({
+    where: { id },
     data: {
-      title: title,
-      artist: {
-        connect: {
-          id: artistId,
-        },
-      },
-      ...(imageFileName && { image: `/uploads/${imageFileName}` }),
-      ...(audioFileName && { audio: `/uploads/${audioFileName}` }),
+      title,
+      ...(imagePath && { image: imagePath }),
+      ...(audioPath && { audio: audioPath }),
     },
   });
 
-  return song;
+  return updatedSong;
 }

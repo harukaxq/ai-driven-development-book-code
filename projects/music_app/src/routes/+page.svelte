@@ -1,35 +1,45 @@
 <script lang="ts">
-	import ArtistCard from "$lib/components/ArtistCard.svelte";
-	import SongCard from "$lib/components/SongCard.svelte";
-	import { onMount } from "svelte";
-	import type { SongWithArtist } from "../type";
-	import type { Artist } from "@prisma/client";
-	let artists: Artist[] = [];
-	let songs: SongWithArtist[] = [];
+  import { onMount } from 'svelte';
+  import SongCard from '$lib/components/SongCard.svelte';
+  import ArtistCard from '$lib/components/ArtistCard.svelte';
+  import type { SongWithArtist, ArtistWithSongs } from '$lib/type';
 
-	onMount(async () => {
-		const artistResponse = await fetch('/api/artist');
-		const artistData = await artistResponse.json();
-		artists = artistData;
+  let artists: ArtistWithSongs[] = [];
+  let songs: SongWithArtist[] = [];
 
-		const songResponse = await fetch('/api/song');
-		const songData = await songResponse.json();
-		songs = songData;
-	});
+  onMount(async () => {
+    try {
+      const artistResponse = await fetch('/api/artists/');
+      if (artistResponse.ok) {
+        artists = await artistResponse.json();
+      } else {
+        console.error('Failed to fetch artists');
+      }
+
+      const songResponse = await fetch('/api/songs/');
+      if (songResponse.ok) {
+        songs = await songResponse.json();
+      } else {
+        console.error('Failed to fetch songs');
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  });
 </script>
 
-<div class="container mx-auto p-4">
-	<h1 class="text-3xl font-bold mb-4 text-white">アーティスト一覧</h1>
-	<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-		{#each artists as artist}
-			<ArtistCard {artist} />
-		{/each}
-	</div>
+<div class="p-4 space-y-8">
+  <h2 class="text-2xl font-bold text-white">アーティスト一覧</h2>
+  <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+    {#each artists as artist}
+      <ArtistCard artist={artist} />
+    {/each}
+  </div>
 
-	<h1 class="text-3xl font-bold mt-8 mb-4 text-white">曲一覧</h1>
-	<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-		{#each songs as song}
-			<SongCard {song} />
-		{/each}
-	</div>
+  <h2 class="text-2xl font-bold text-white mt-8">曲一覧</h2>
+  <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+    {#each songs as song}
+      <SongCard song={song} />
+    {/each}
+  </div>
 </div>

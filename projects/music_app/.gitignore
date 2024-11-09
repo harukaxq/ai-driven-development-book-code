@@ -25,3 +25,5 @@ vite.config.ts.timestamp-*
 .cloudflare
 
 *.db
+
+test-results

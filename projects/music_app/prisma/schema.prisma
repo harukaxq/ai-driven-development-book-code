@@ -1,6 +1,5 @@
 generator client {
   provider = "prisma-client-js"
-  previewFeatures = ["driverAdapters"]
 }
 
 datasource db {
@@ -9,23 +8,18 @@ datasource db {
 }
 
 model Artist {
-  id          Int      @id @default(autoincrement())
-  name        String   
-  profile     String
-  image       String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  songs       Song[]
+  id        Int      @id @default(autoincrement())
+  name      String
+  profile   String?
+  image String?
+  songs     Song[]
 }
 
 model Song {
-  id          Int      @id @default(autoincrement())
-  title       String 
-  image       String
-  audio       String
-  playCount   Int      @default(0)
-  artistId    Int
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  artist      Artist   @relation(fields: [artistId], references: [id])
+  id        Int      @id @default(autoincrement())
+  title     String
+  artistId  Int
+  audio String
+  image String?
+  artist    Artist   @relation(fields: [artistId], references: [id])
 }

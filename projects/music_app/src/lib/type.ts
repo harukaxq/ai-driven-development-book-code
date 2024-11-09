@@ -5,3 +5,10 @@ export type SongWithArtist = Prisma.SongGetPayload<{
         artist: true;
     };
 }>;
+
+
+export type ArtistWithSongs = Prisma.ArtistGetPayload<{
+    include: {
+        songs: true;
+    };
+}>;

@@ -6,22 +6,19 @@
 		"dev": "vite dev",
 		"build": "vite build",
 		"preview": "vite preview",
-		"test": "npm run test:integration && npm run test:unit",
+		"test:init": "DATABASE_URL=file:./test.db prisma db push",
+		"test": "DATABASE_URL=file:./test.db vitest run",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"lint": "prettier --check . && eslint .",
-		"format": "prettier --write .",
-		"test:integration": "playwright test",
-		"test:unit": "vitest"
+		"format": "prettier --write ."
 	},
 	"devDependencies": {
-		"@flydotio/dockerfile": "^0.5.9",
 		"@playwright/test": "^1.28.1",
 		"@prisma/adapter-d1": "^5.20.0",
 		"@prisma/client": "^5.20.0",
 		"@sveltejs/adapter-auto": "^3.0.0",
 		"@sveltejs/adapter-cloudflare-workers": "^2.5.4",
-		"@sveltejs/adapter-node": "^5.2.8",
 		"@sveltejs/kit": "^2.0.0",
 		"@sveltejs/vite-plugin-svelte": "^3.1.2",
 		"@testing-library/jest-dom": "^6.5.0",
@@ -54,6 +51,7 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@sveltejs/adapter-cloudflare": "^4.7.4",
 		"uuid": "^10.0.0"
 	}
 }

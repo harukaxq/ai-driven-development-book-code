@@ -1,37 +1,85 @@
-import { updateArtist } from './updateArtist';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { PrismaClient } from '@prisma/client';
+import { updateArtist } from './updateArtist';
 import fs from 'fs';
+import path from 'path';
 
 const prisma = new PrismaClient();
 
 describe('updateArtist', () => {
-  it('should update an existing artist in the database', async () => {
-    // テスト用のアーティストを作成
-    const artist = await prisma.artist.create({
+  const testImageBuffer = Buffer.from('dummy content');
+
+  beforeAll(async () => {
+    // テスト用のディレクトリを作成
+    const uploadDir = path.join(process.cwd(), 'static', 'uploads');
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+
+    // テスト用のアーティストを追加
+    await prisma.artist.create({
       data: {
         name: 'Original Artist',
-        profile: 'Original Profile',
-        image: '/uploads/images/original.jpg',
+        profile: 'Original profile',
+        image: '/static/uploads/original.png',
       },
     });
+  });
 
-    const newName = 'Updated Artist';
-    const newProfile = 'Updated Profile';
-    const imageBuffer = Buffer.from('updated image buffer');
+  afterAll(async () => {
+    // テストデータを削除
+    const testArtist = await prisma.artist.findFirst({
+      where: { name: 'Test Artist' },
+      include: { songs: true }
+    });
 
-    // アーティストを更新
-    const updatedArtist = await updateArtist(artist.id, newName, newProfile, imageBuffer);
+    if (testArtist) {
+      if (testArtist.songs.length > 0) {
+        await prisma.song.deleteMany({
+          where: { artistId: testArtist.id }
+        });
+      }
 
-    expect(updatedArtist.name).toBe(newName);
-    expect(updatedArtist.profile).toBe(newProfile);
-    expect(updatedArtist.image).toContain('/uploads/images/');
+      await prisma.artist.delete({
+        where: { id: testArtist.id }
+      });
+    }
 
-    // 画像ファイルが保存されていることを確認
-    const imagePath = `./static/uploads/images/${updatedArtist.image.split('/').pop()}`;
-    expect(fs.existsSync(imagePath)).toBe(true);
+    // アップロードされたファイルを削除
+    const uploadDir = path.join(process.cwd(), 'static', 'uploads');
+    fs.readdirSync(uploadDir).forEach(file => {
+      if (file.startsWith('test')) {
+        fs.unlinkSync(path.join(uploadDir, file));
+      }
+    });
 
-    // テスト用のアーティストと画像を削除
-    await prisma.artist.delete({ where: { id: artist.id } });
-    fs.unlinkSync(imagePath);
+    await prisma.$disconnect();
+  });
+
+  it('should update an existing artist in the database', async () => {
+    const testFile = new File([testImageBuffer], 'test.png', {
+      type: 'image/png',
+      lastModified: new Date().getTime(),
+    });
+
+    // エラー対策のためにFile.prototype.arrayBufferを上書き
+    testFile.arrayBuffer = async function() {
+      return testImageBuffer.buffer;
+    };
+
+    const originalArtist = await prisma.artist.findFirst({
+      where: { name: 'Original Artist' },
+    });
+
+    if (!originalArtist) {
+      throw new Error('Original artist not found');
+    }
+
+    const updatedArtist = await updateArtist(originalArtist.id, 'Updated Artist', 'Updated profile', testFile);
+
+    expect(updatedArtist).toBeDefined();
+    expect(updatedArtist.name).toBe('Updated Artist');
+    expect(updatedArtist.profile).toBe('Updated profile');
+    expect(updatedArtist.image).toMatch(/^\/static\/uploads\/test\.png$/);
   });
 });

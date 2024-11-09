@@ -1,26 +1,33 @@
 import { PrismaClient } from '@prisma/client';
-import { v4 as uuidv4 } from 'uuid';
 import fs from 'fs';
+import path from 'path';
 
 const prisma = new PrismaClient();
 
-export async function updateArtist(id: number, name: string, profile: string, imageBuffer?: Buffer) {
-  let imageFileName;
-  if (imageBuffer) {
-    const imageId = uuidv4();
-    imageFileName = `${imageId}.jpg`;
-    fs.writeFileSync(`./static/uploads/images/${imageFileName}`, imageBuffer);
+export async function updateArtist(id: number, name: string, profile: string, imageFile?: File) {
+  let imagePath = null;
+
+  if (imageFile) {
+    // 画像ファイルを保存するパスを設定
+    const uploadDir = path.join(process.cwd(), 'static', 'uploads');
+    const filePath = path.join(uploadDir, imageFile.name);
+
+    // 画像ファイルを保存
+    const buffer = await imageFile.arrayBuffer();
+    fs.writeFileSync(filePath, Buffer.from(buffer));
+
+    imagePath = `/static/uploads/${imageFile.name}`;
   }
 
   // アーティスト情報をデータベースで更新
-  const artist = await prisma.artist.update({
-    where: { id: id },
+  const updatedArtist = await prisma.artist.update({
+    where: { id },
     data: {
-      name: name,
-      profile: profile,
-      ...(imageFileName && { image: `/uploads/images/${imageFileName}` }),
+      name,
+      profile,
+      ...(imagePath && { image: imagePath }),
     },
   });
 
-  return artist;
+  return updatedArtist;
 }
