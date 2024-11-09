@@ -1,16 +1,16 @@
 <script lang="ts">
-	import { playSong } from "../module/player";
-	import { getFavorite, addToFavorite, removeFromFavorite } from "../module/favorite";
-	import type { SongWithArtist } from "../../type";
 	import { onMount } from "svelte";
+	import { favoriteIds, addToFavorite, removeFromFavorite } from "../module/favorite";
+	import { get } from "svelte/store";
+	import type { SongWithArtist } from '../type';
+	import { playSong } from '../module/player';
 
 	export let song: SongWithArtist;
 
 	let isFavorite = false;
 
 	onMount(() => {
-		const favorite = getFavorite();
-		isFavorite = favorite.includes(song.id);
+		isFavorite = get(favoriteIds).includes(song.id);
 	});
 
 	function handlePlay() {
@@ -19,10 +19,12 @@
 
 	function handleAddToFavorite() {
 		addToFavorite(song.id);
+		alert("お気に入りに追加されました");
 	}
 
 	function handleRemoveFromFavorite() {
 		removeFromFavorite(song.id);
+		alert("お気に入りから削除されました");
 	}
 
 	function toggleFavorite() {
@@ -36,15 +38,13 @@
 </script>
 
 <div class="max-w-sm p-4 bg-gray-800 border border-gray-600 rounded-lg shadow">
-  <img class="w-full rounded-t-lg" src={song.image} alt="アルバムアート">
+  <img class="w-full rounded-t-lg" src={song.image || '/img/song_default.webp'} alt="アルバムアート">
   <div class="p-5">
     <h5 class="mb-2 text-2xl font-bold tracking-tight text-white">{song.title}</h5>
-	{#if !!song.artist}
+    <p class="mb-2 text-sm font-normal text-gray-400">再生数: {song.playCount ??0}回</p>
     <p class="mb-3 font-normal text-gray-400">
       <a href={`/artists/${song.artist.id}`} class="text-gray-400 hover:underline">{song.artist.name}</a>
     </p>
-	{/if}
-    <p class="my-4 text-sm font-normal text-gray-400 text-right">再生数: {song.playCount}</p>
     <div class="flex justify-between items-center">
       <button on:click={handlePlay} class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">

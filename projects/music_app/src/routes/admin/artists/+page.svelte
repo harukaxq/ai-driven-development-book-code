@@ -1,127 +1,176 @@
-<script>
-  import { onMount } from 'svelte';
-  import { writable } from 'svelte/store';
+<script lang="ts">
+    import { onMount } from 'svelte';
+    import { writable } from 'svelte/store';
+    import type { Artist } from '@prisma/client';
 
-  const artists = writable([]);
-  const newArtist = {
-    name: '',
-    profile: '',
-    image: ''
-  };
-  let isModalOpen = false;
-  let editingArtist = null;
+    let artists = writable<Artist[]>([]);
+    let showModal = writable(false);
+    let showEditModal = writable(false);
+    let newArtistName = '';
+    let newArtistProfile = '';
+    let newArtistImage: File | null = null;
+    let editArtistId: string | null = null;
+    let editArtistName = '';
+    let editArtistProfile = '';
+    let editArtistImage: File | null = null;
 
-  const fetchArtists = async () => {
-    const response = await fetch('/api/artist');
-    const data = await response.json();
-    artists.set(data);
-  };
+    const fetchArtists = async () => {
+        const response = await fetch('/api/artists');
+        const data = await response.json();
+        artists.set(data);
+    };
 
-  const addArtist = async () => {
-    const response = await fetch('/api/artist', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(newArtist)
-    });
-    if (response.ok) {
-      fetchArtists();
-      resetNewArtist();
-      alert('アーティストが追加されました');
-      isModalOpen = false; // モーダルを閉じる
-    } else {
-      alert('アーティストの追加に失敗しました');
-    }
-  };
+    const addArtist = async () => {
+        const formData = new FormData();
+        formData.append('name', newArtistName);
+        formData.append('profile', newArtistProfile);
+        if (newArtistImage) {
+            formData.append('image', newArtistImage);
+        }
 
-  const updateArtist = async () => {
-    const response = await fetch(`/api/artist/${editingArtist.id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(editingArtist)
-    });
-    if (response.ok) {
-      fetchArtists();
-      alert('アーティストが更新されました');
-      isModalOpen = false; // モーダルを閉じる
-    } else {
-      alert('アーティストの更新に失敗しました');
-    }
-  };
+        const response = await fetch('/admin/api/artists', {
+            method: 'POST',
+            body: formData
+        });
 
-  const deleteArtist = async (id) => {
-    const response = await fetch(`/api/artist/${id}`, {
-      method: 'DELETE'
-    });
-    if (response.ok) {
-      fetchArtists();
-      alert('アーティストが削除されました');
-    } else {
-      alert('アーティストの削除に失敗しました');
-    }
-  };
+        if (response.ok) {
+            fetchArtists();
+            showModal.set(false);
+            newArtistName = '';
+            newArtistProfile = '';
+            newArtistImage = null;
+            alert('アーティストが追加されました');
+        } else {
+            console.error('Failed to add artist');
+        }
+    };
 
-  const resetNewArtist = () => {
-    newArtist.name = '';
-    newArtist.profile = '';
-    newArtist.image = '';
-  };
+    const editArtist = async () => {
+        const formData = new FormData();
+        if (editArtistId) {
+            formData.append('id', editArtistId);
+        }
+        formData.append('name', editArtistName);
+        formData.append('profile', editArtistProfile);
+        if (editArtistImage) {
+            formData.append('image', editArtistImage);
+        } else {
+            alert('画像がアップロードされていません');
+            return;
+        }
 
-  const openModal = (artist = null) => {
-    if (artist) {
-      editingArtist = { ...artist }; // 編集するアーティストの情報をコピー
-    } else {
-      resetNewArtist();
-    }
-    isModalOpen = true; // モーダルを開く
-  };
+        const response = await fetch('/admin/api/artists', {
+            method: 'PUT',
+            body: formData
+        });
 
-  onMount(() => {
-    fetchArtists();
-  });
+        if (response.ok) {
+            fetchArtists();
+            showEditModal.set(false);
+        } else {
+            console.error('Failed to edit artist');
+        }
+    };
+
+    const openEditModal = (artist: Artist) => {
+        editArtistId = artist.id.toString();
+        editArtistName = artist.name;
+        editArtistProfile = artist.profile;
+        editArtistImage = null;
+        showEditModal.set(true);
+    };
+
+    const handleFileChange = (e: Event, setImage: (file: File | null) => void) => {
+        const target = e.target as HTMLInputElement;
+        setImage(target.files?.[0] || null);
+    };
+
+    onMount(fetchArtists);
 </script>
 
-vasdfbbgb
-<div>
-  <h1>アーティスト管理</h1>
-  <table>
-    <thead>
-      <tr>
-        <th>アーティスト名</th>
-        <th>プロフィール</th>
-        <th>画像</th>
-        <th>操作</th>
-      </tr>
-    </thead>
-    <tbody>
-      {#each $artists as artist}
-        <tr>
-          <td>{artist.name}</td>
-          <td>{artist.profile}</td>
-          <td><img src={artist.image} alt={artist.name} width="50" /></td>
-          <td>
-            <button on:click={() => openModal(artist)}>編集</button>
-            <button on:click={() => deleteArtist(artist.id)}>削除</button>
-          </td>
-        </tr>
-      {/each}
-    </tbody>
-  </table>
+<div class="mx-4">
+    <button class="bg-blue-500 text-white p-2 rounded float-right mb-4 mt-4" on:click={() => showModal.set(true)}>新規アーティスト追加</button>
 
-  <h2>新規アーティスト追加</h2>
-  <button on:click={() => openModal()}>アーティスト追加</button>
+    {#if $showModal}
+        <div class="fixed inset-0 bg-gray-700 bg-opacity-75 flex items-center justify-center p-4">
+            <div class="bg-white p-6 rounded shadow-lg w-1/3 mx-4">
+                <h2 class="text-xl mb-4">新規アーティスト追加</h2>
+                <label class="block mb-2">
+                    名前:
+                    <input type="text" bind:value={newArtistName} class="border p-2 w-full" />
+                </label>
+                <label class="block mb-2">
+                    プロフィール:
+                    <textarea bind:value={newArtistProfile} class="border p-2 w-full"></textarea>
+                </label>
+                <label class="block mb-4">
+                    画像:
+                    <input type="file" accept="image/*" on:change={(e) => handleFileChange(e, (file) => newArtistImage = file)} class="border p-2 w-full" />
+                </label>
+                <div class="flex justify-end">
+                    <button class="bg-gray-500 text-white p-2 rounded mr-2" on:click={() => showModal.set(false)}>キャンセル</button>
+                    <button class="bg-blue-500 text-white p-2 rounded" on:click={addArtist}>追加</button>
+                </div>
+            </div>
+        </div>
+    {/if}
 
-  {#if isModalOpen}
-    <div class="modal">
-      <h2>{editingArtist ? 'アーティスト編集' : '新規アーティスト追加'}</h2>
-      <input type="text" placeholder="アーティスト名" bind:value={editingArtist ? editingArtist.name : newArtist.name} />
-      <textarea placeholder="プロフィール" bind:value={editingArtist ? editingArtist.profile : newArtist.profile}></textarea>
-      <input type="file" bind:value={editingArtist ? editingArtist.image : newArtist.image} />
-      <button on:click={editingArtist ? updateArtist : addArtist}>{editingArtist ? '更新' : '追加'}</button>
-      <button on:click={() => isModalOpen = false}>キャンセル</button>
-    </div>
-  {/if}
+    {#if $showEditModal}
+        <div class="fixed inset-0 bg-gray-700 bg-opacity-75 flex items-center justify-center p-4">
+            <div class="bg-white p-6 rounded shadow-lg w-1/3 mx-4">
+                <h2 class="text-xl mb-4">アーティスト情報編集</h2>
+                <label class="block mb-2">
+                    名前:
+                    <input type="text" bind:value={editArtistName} class="border p-2 w-full" />
+                </label>
+                <label class="block mb-2">
+                    プロフィール:
+                    <textarea bind:value={editArtistProfile} class="border p-2 w-full"></textarea>
+                </label>
+                <label class="block mb-4">
+                    画像:
+                    <input type="file" accept="image/*" on:change={(e) => handleFileChange(e, (file) => editArtistImage = file)} class="border p-2 w-full" />
+                </label>
+                <div class="flex justify-end">
+                    <button class="bg-gray-500 text-white p-2 rounded mr-2" on:click={() => showEditModal.set(false)}>キャンセル</button>
+                    <button class="bg-blue-500 text-white p-2 rounded" on:click={editArtist}>保存</button>
+                </div>
+            </div>
+        </div>
+    {/if}
+
+    {#if $artists.length === 0}
+        <p class="text-center text-gray-500 mt-4">アーティストが登録されていません</p>
+    {:else}
+        <table class="min-w-full bg-white mt-4">
+            <thead>
+                <tr>
+                    <th class="py-2 px-4 border-b">アーティスト名</th>
+                    <th class="py-2 px-4 border-b">プロフィール</th>
+                    <th class="py-2 px-4 border-b">画像</th>
+                    <th class="py-2 px-4 border-b">曲管理ページ</th>
+                    <th class="py-2 px-4 border-b">編集</th>
+                </tr>
+            </thead>
+            <tbody>
+                {#each $artists as artist}
+                    <tr>
+                        <td class="py-2 px-4 border-b">{artist.name}</td>
+                        <td class="py-2 px-4 border-b max-w-xs break-words">{artist.profile}</td>
+                        <td class="py-2 px-4 border-b">
+                            <div class="flex justify-center">
+                                <img src={artist.image} alt={artist.name} class="h-16 w-16 object-cover rounded-full" />
+                            </div>
+                        </td>
+                        <td class="py-2 px-4 border-b text-center">
+                            <a href={`/admin/artists/${artist.id}/songs`} class="text-blue-500 hover:underline">曲管理</a>
+                        </td>
+                        <td class="py-2 px-4 border-b text-center">
+                            <button class="bg-yellow-500 text-white p-2 rounded" on:click={() => openEditModal(artist)}>編集</button>
+                        </td>
+                    </tr>
+                {/each}
+            </tbody>
+        </table>
+    {/if}
 </div>

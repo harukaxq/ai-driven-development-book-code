@@ -1,30 +1,25 @@
+import type { SongWithArtist } from '$lib/type';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-export async function listSong(ids?: number[]) {
-  const songs = await prisma.song.findMany({
-    where: ids ? { id: { in: ids } } : {},
-    include: {
-      artist: true,
-    },
-  });
-
-  return songs.map(song => ({
-    id: song.id,
-    title: song.title,
-    image: song.image || '/img/song_default.webp',
-    audio: song.audio,
-    artistId: song.artistId,
-    createdAt: song.createdAt,
-    updatedAt: song.updatedAt,
-    artist: {
-      id: song.artist.id,
-      name: song.artist.name,
-      profile: song.artist.profile,
-      image: song.artist.image || '/img/artist_default.webp',
-      createdAt: song.artist.createdAt,
-      updatedAt: song.artist.updatedAt,
-    },
-  }));
+export async function listSong(songIds?: number[], artistId?: number): Promise<SongWithArtist[]> {
+  if (songIds && songIds.length > 0) {
+    const songs = await prisma.song.findMany({
+      where: { id: { in: songIds } },
+      include: { artist: true }
+    });
+    return songs;
+  } else if (artistId) {
+    const songs = await prisma.song.findMany({
+      where: { artistId },
+      include: { artist: true }
+    });
+    return songs;
+  } else {
+    const songs = await prisma.song.findMany({
+      include: { artist: true }
+    });
+    return songs;
+  }
 }

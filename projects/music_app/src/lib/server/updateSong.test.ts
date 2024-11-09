@@ -1,43 +1,100 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { PrismaClient } from '@prisma/client';
-import fs from 'fs';
 import { updateSong } from './updateSong';
+import fs from 'fs';
+import path from 'path';
 
 const prisma = new PrismaClient();
 
 describe('updateSong', () => {
-  it('should update a song in the database', async () => {
-    // まず曲を追加
-    const initialTitle = '初期曲';
-    const artistId = 1;
-    const initialImageBuffer = Buffer.from('初期画像');
-    const initialAudioBuffer = Buffer.from('初期音声');
+  const testImageBuffer = Buffer.from('dummy image content');
+  const testAudioBuffer = Buffer.from('dummy audio content');
+  let artistId: number;
+  let songId: number;
 
-    const initialSong = await prisma.song.create({
+  beforeAll(async () => {
+    // テスト用のディレクトリを作成
+    const uploadDir = path.join(process.cwd(), 'static', 'uploads');
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+
+    // テスト用のアーティストを作成
+    const artist = await prisma.artist.create({
       data: {
-        title: initialTitle,
-        image: '/uploads/initial_image.jpg',
-        audio: '/uploads/initial_audio.mp3',
-        artistId: artistId,
+        name: 'Test Artist',
+        profile: 'This is a test artist.',
+        image: '/uploads/test-artist.png',
       },
     });
 
-    // 曲を更新
-    const updatedTitle = '更新曲';
-    const updatedImageBuffer = Buffer.from('更新画像');
-    const updatedAudioBuffer = Buffer.from('更新音声');
+    artistId = artist.id;
 
-    const updatedSong = await updateSong(initialSong.id, updatedTitle, artistId, updatedImageBuffer, updatedAudioBuffer);
+    // テスト用の曲を作成
+    const song = await prisma.song.create({
+      data: {
+        title: 'Original Title',
+        image: '/uploads/original.png',
+        audio: '/uploads/original.mp3',
+        artistId: artist.id,
+      },
+    });
 
-    expect(updatedSong).toHaveProperty('id');
-    expect(updatedSong.title).toBe(updatedTitle);
-    expect(updatedSong.artistId).toBe(artistId);
-    expect(updatedSong.image).toMatch(/\/uploads\/.*\.jpg/);
-    expect(updatedSong.audio).toMatch(/\/uploads\/.*\.mp3/);
+    songId = song.id;
+  });
 
-    // クリーンアップ
-    fs.unlinkSync(`./static${updatedSong.image}`);
-    fs.unlinkSync(`./static${updatedSong.audio}`);
-    await prisma.song.delete({ where: { id: updatedSong.id } });
+  afterAll(async () => {
+    // テストデータを削除
+    await prisma.song.delete({
+      where: { id: songId }
+    });
+
+    await prisma.artist.delete({
+      where: { id: artistId }
+    });
+
+    // アップロードされたファイルを削除
+    const uploadDir = path.join(process.cwd(), 'static', 'uploads');
+    fs.readdirSync(uploadDir).forEach(file => {
+      if (file.startsWith('test')) {
+        fs.unlinkSync(path.join(uploadDir, file));
+      }
+    });
+
+    await prisma.$disconnect();
+  });
+
+  it('should update the song title', async () => {
+    const updatedSong = await updateSong(songId, 'Updated Title');
+
+    expect(updatedSong).toBeDefined();
+    expect(updatedSong.title).toBe('Updated Title');
+  });
+
+  it('should update the song image and audio', async () => {
+    const testImageFile = new File([testImageBuffer], 'test.png', {
+      type: 'image/png',
+      lastModified: new Date().getTime(),
+    });
+
+    const testAudioFile = new File([testAudioBuffer], 'test.mp3', {
+      type: 'audio/mpeg',
+      lastModified: new Date().getTime(),
+    });
+
+    // エラー対策のためにFile.prototype.arrayBufferを上書き
+    testImageFile.arrayBuffer = async function() {
+      return testImageBuffer.buffer;
+    };
+
+    testAudioFile.arrayBuffer = async function() {
+      return testAudioBuffer.buffer;
+    };
+
+    const updatedSong = await updateSong(songId, 'Updated Title', testImageFile, testAudioFile);
+
+    expect(updatedSong).toBeDefined();
+    expect(updatedSong.image).toMatch(/^\/static\/uploads\/test\.png$/);
+    expect(updatedSong.audio).toMatch(/^\/static\/uploads\/test\.mp3$/);
   });
 });

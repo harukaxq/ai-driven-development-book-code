@@ -1,84 +1,52 @@
-import type { Song } from "@prisma/client";
-import { writable } from 'svelte/store';
+import { get, writable, type Writable } from 'svelte/store';
+import type { SongWithArtist } from '$lib/type';
 
-export const isPlaying = writable(false);
-export const currentSong = writable<Song | null>(null);
-export const currentAudio = writable<HTMLAudioElement | null>(null);
-export const audioDuration = writable<number>(0);
+export const isPlaying: Writable<boolean> = writable(false);
+export const currentSong: Writable<SongWithArtist | null> = writable(null);
+export const currentAudio: Writable<HTMLAudioElement | null> = writable(null);
+export const currentTime: Writable<number> = writable(0);
+export const audioDuration: Writable<number> = writable(0);
+export const currentVolume: Writable<number> = writable(1);
 
-export async function playSong(song: Song) {
-    currentAudio.update(audio => {
-        if (audio) {
-            audio.pause();
-        }
-        const newAudio = new Audio(song.audio);
-        
-        // Set duration when metadata is loaded
-        newAudio.addEventListener('loadedmetadata', () => {
-            audioDuration.set(newAudio.duration);
-        });
+export async function playSong(song: SongWithArtist) {
+  currentSong.set(song);
+  const audio = new Audio(song.audio);
+  currentAudio.set(audio);
 
-        newAudio.play();
-        isPlaying.set(true);
-        currentSong.set(song);
+  audio.addEventListener('loadedmetadata', () => {
+    audioDuration.set(audio.duration);
+  });
 
-        // Add event listener for when playback ends
-        newAudio.addEventListener('ended', () => {
-            isPlaying.set(false);
-            currentSong.set(null);
-        });
+  audio.addEventListener('ended', () => {
+    isPlaying.set(false);
+  });
 
-        return newAudio;
-    });
+  audio.addEventListener('timeupdate', () => {
+    currentTime.set(audio.currentTime);
+  });
 
-    // 再生数をインクリメントするAPIを呼び出す
-    try {
-        await fetch(`/api/song/${song.id}`, {
-            method: 'PUT'
-        });
-    } catch (error) {
-        console.error('再生数のインクリメント中にエラーが発生しました:', error);
-    }
+  audio.volume = get(currentVolume);
+  audio.play();
+  isPlaying.set(true);
+
+  // 再生数をインクリメントするAPIを呼び出す
+  await fetch(`/api/songs/${song.id}`, {
+    method: 'PUT'
+  });
 }
 
 export function stopSong() {
-    currentAudio.update(audio => {
-        if (audio) {
-            audio.pause();
-            isPlaying.set(false);
-        }
-        return audio;
-    });
+  const audio = get(currentAudio);
+  if (audio) {
+    audio.pause();
+    isPlaying.set(false);
+  }
 }
-
-export const playbackTime = writable(0);
-
-currentAudio.subscribe(audio => {
-    if (audio) {
-        const interval = setInterval(() => {
-            playbackTime.set(audio.currentTime);
-        }, 1000);
-
-        return () => clearInterval(interval);
-    }
-});
-
-export const currentVolume = writable(1.0);
 
 export function setVolume(volume: number) {
-    currentAudio.update(audio => {
-        if (audio) {
-            audio.volume = volume;
-        }
-        return audio;
-    });
-}
-
-export function seek(time: number) {
-    currentAudio.update(audio => {
-        if (audio) {
-            audio.currentTime = time;
-        }
-        return audio;
-    });
+  currentVolume.set(volume);
+  const audio = get(currentAudio);
+  if (audio) {
+    audio.volume = volume;
+  }
 }

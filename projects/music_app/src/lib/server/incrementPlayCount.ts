@@ -3,7 +3,7 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 export async function incrementPlayCount(songId: number) {
-  const song = await prisma.song.update({
+  const updatedSong = await prisma.song.update({
     where: { id: songId },
     data: {
       playCount: {
@@ -12,5 +12,5 @@ export async function incrementPlayCount(songId: number) {
     },
   });
 
-  return song;
-}
+  return updatedSong;
+} 
