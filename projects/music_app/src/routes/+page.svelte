@@ -30,14 +30,14 @@
 
 <div class="p-4 space-y-8">
   <h2 class="text-2xl font-bold text-white">アーティスト一覧</h2>
-  <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
     {#each artists as artist}
       <ArtistCard artist={artist} />
     {/each}
   </div>
 
   <h2 class="text-2xl font-bold text-white mt-8">曲一覧</h2>
-  <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
     {#each songs as song}
       <SongCard song={song} />
     {/each}
