@@ -110,25 +110,23 @@
 		}
 	}
 
-	// Expose the checkWinCondition function to the global scope
-	(window as any).checkWinCondition = checkWinCondition;
-
 	onMount(() => {
 		initializeBoard();
+		(window as any).checkWinCondition = checkWinCondition;
 	});
 </script>
 
 <div class="board">
 	{#each board as row, i}
 		{#each row as cell, j}
-			<div class="cell" on:click={() => makeMove(i, j, currentPlayer)}>
+			<button class="cell" on:click={() => makeMove(i, j, currentPlayer)} aria-label="Cell">
 				{#if cell === 'black'}
 					<div class="black"></div>
 				{/if}
 				{#if cell === 'white'}
 					<div class="white"></div>
 				{/if}
-			</div>
+			</button>
 		{/each}
 	{/each}
 </div>
@@ -147,6 +145,8 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		border: none;
+		cursor: pointer;
 	}
 	.black {
 		background-color: black;
