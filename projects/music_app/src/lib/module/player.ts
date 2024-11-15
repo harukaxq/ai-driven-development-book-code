@@ -9,6 +9,24 @@ export const audioDuration: Writable<number> = writable(0);
 export const currentVolume: Writable<number> = writable(1);
 
 export async function playSong(song: SongWithArtist) {
+  const currentAudioElement = get(currentAudio);
+  const currentSongValue = get(currentSong);
+
+  // 同じ曲が再生されている場合は停止
+  if (currentSongValue && currentSongValue.id === song.id) {
+    if (currentAudioElement) {
+      currentAudioElement.pause();
+      isPlaying.set(false);
+    }
+    return;
+  }
+
+  // 異なる曲が再生されている場合は破棄
+  if (currentAudioElement) {
+    currentAudioElement.pause();
+    currentAudioElement.currentTime = 0;
+  }
+
   currentSong.set(song);
   const audio = new Audio(song.audio);
   currentAudio.set(audio);
