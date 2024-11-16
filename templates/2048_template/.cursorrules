@@ -1,0 +1,1 @@
+- *.svelteではwindowがundefinedで実行されることがあるのでエラーが起きないように考慮する
