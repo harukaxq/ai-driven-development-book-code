@@ -6,7 +6,7 @@
   
 </script>
 
-<div class="max-w-md mx-auto bg-white dark:bg-gray-800 p-8 rounded shadow">
+<div class="max-w-md mx-auto bg-white dark:bg-gray-800 p-8 rounded shadow mt-4">
   {#if errorMessage}
     <div class="mb-4 text-red-500">{errorMessage}</div> <!-- エラーメッセージを表示 -->
   {/if}
