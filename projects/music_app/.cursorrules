@@ -8,3 +8,9 @@
 - APIの中でtry catchを使用しない。
 - 可能な限りTypeScriptの型を使用しなさい。
 - Prismaの型は@prisma/clientからインポートしなさい。
+- テストコードでは、File.prototype.arrayBufferが存在せず、実行がエラーになるため以下のようにFile.prototype.arrayBufferを上書きして使用しなさい。
+```
+ testFile.arrayBuffer = async function() {
+      return testImageBuffer.buffer;
+    };
+```
