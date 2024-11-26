@@ -245,9 +245,9 @@ graph TD
 #### アーティスト管理ページ(/admin/artists/)
 - **概要**：アーティストの一覧表示、追加、編集を行います。
 - **API**：
-  - GET /api/artist アーティスト情報の取得
-  - POST /admin/api/artist アーティストの追加
-  - PUT /admin/api/artist/[id] アーティストの更新
+  - GET /api/artists アーティスト情報の取得
+  - POST /admin/api/artists アーティストの追加
+  - PUT /admin/api/artists アーティストの更新
 - **UIコンポーネント**：
   - **アーティスト一覧テーブル**：
     - アーティスト名
@@ -264,6 +264,10 @@ graph TD
 #### 曲管理ページ(/admin/artists/[id]/songs)
 
 - **概要**：曲の一覧表示や詳細情報の管理を行います。
+- **API**：
+  - GET /api/songs 曲の取得
+  - POST /admin/api/songs 曲情報の追加
+  - PUT /admin/api/songs 曲情報の更新
 - **UIコンポーネント**：
   - **曲一覧テーブル**：
     - 曲名
