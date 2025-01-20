@@ -13,7 +13,7 @@ Googleアカウントでログイン後、以下のような画面が表示さ�
 ## 2.System Instructionにエラー解決チャットボット用のプロンプトを入力する
 System Instruction部分に以下URLで表示されるプロダクトをすべてコピーして入力します。
 
-[エラー解決チャットボット用のプロンプト](error_prompt.md)
+[エラー解決チャットボット用のプロンプト](https://raw.githubusercontent.com/harukaxq/ai-driven-development-book-code/refs/heads/main/docs/error_prompt.md)
 
 ## 3.モデルを選択する
 今回のエラー解決チャットボットに適切なモデルを選択します。画面右上のモデル選択ボタンをクリックし、`Gemini 2.0 Flash Thiking Experimental`を選択します。
